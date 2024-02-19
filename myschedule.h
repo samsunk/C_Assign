@@ -1,4 +1,4 @@
-#include "mydate.h"
+
 
 struct Date
 {
@@ -6,6 +6,8 @@ struct Date
     int month;
     int year;
 };
+typedef struct Date date;
+
 struct Schedule{
     char constituency[100];
     date d;
