@@ -1,5 +1,3 @@
-
-
 struct Date
 {
     int day;
@@ -14,6 +12,16 @@ struct Schedule{
 };
 
 typedef struct Schedule schedule;
+
+struct Voter{
+    int SNO;
+    char voterName[50];
+    date birthDate;
+    char address[50];
+    char password[10];
+};
+
+typedef struct Voter voter;
 
 int is_validate_date(date d);
 

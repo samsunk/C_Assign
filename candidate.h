@@ -5,3 +5,4 @@ struct Candidate{
 };
 
 typedef struct Candidate candidate;
+
