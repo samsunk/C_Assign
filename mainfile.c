@@ -16,6 +16,9 @@ int ageEligibility(date d);
 void viewCandidateList();
 void viewVoterList();
 void updateVoterDetails();
+void searchVoterDetails(int sno);
+void castVote(voter v);
+void voterdas();
 
 int main()
 {
@@ -35,6 +38,7 @@ again:
         admin();
         break;
     case 2:
+        voterdas();
         break;
     case 3:
 
@@ -45,6 +49,127 @@ again:
         goto again;
     }
     return 0;
+}
+void voterdas()
+{
+    int option;
+    int sno;
+    voter v;
+    FILE *fp;
+    char pass[10];
+    unsigned flag = 0;
+    printf("\n Enter your voter SNO && Password: ");
+    scanf("%d%s", &sno, &pass);
+    printf("\n Checking the registerd voter SNO..... ");
+    if ((fp = fopen("savedfile/voterlist.txt", "r")) == NULL)
+    {
+        printf("\n Error in opening file.. ");
+    }
+    else
+    {
+        while (fread(&v, sizeof(voter), 1, fp) == 1)
+        {
+            if (v.SNO == sno && (strcmp(v.password, pass) == 0))
+            {
+                flag = 1;
+                break;
+            }
+        }
+        if (flag != 1)
+        {
+            printf("\n You are not registerd voter...");
+        }
+        else
+        {
+            drawLine();
+            printf("\n ** Welcome to Voter Dashboard **\n");
+            drawLine();
+            printf("\n1.Cast vote\n2.View Result\n3.Exit\n");
+            drawLine();
+        again:
+            printf("\n Enter your option:");
+            scanf("%d", &option);
+            switch (option)
+            {
+            case 1:
+                castVote(v);
+                break;
+            case 2:
+                break;
+            case 3:
+                myExit();
+                break;
+            default:
+                printf("Invalid Option...");
+                goto again;
+            }
+        }
+    }
+}
+
+void castVote(voter v)
+{
+    FILE *fp_c;
+
+    candidate c;
+
+    printf("\n Now you are going to cast your vote...");
+
+    if ((fp_c = fopen("savedfile/candidatelist.txt", "r")) == NULL)
+    {
+        printf("\n Error in opening file...");
+    }
+    else
+    {
+        drawLine();
+        printf("\n");
+        while ((fread(&c, sizeof(candidate), 1, fp_c)) == 1)
+        {
+
+            if (strcmp(v.address, c.canFrom) == 0)
+            {
+                printf("%s              ", c.name);
+                printf("\t%s              ", c.pParty);
+                printf("\t%s             \n", c.canFrom);
+            }
+        }
+        drawLine();
+        printf("\n");
+    }
+}
+void searchVoterDetails(int sno)
+{
+    voter v;
+    FILE *fp;
+    unsigned flag = 0;
+    fp = fopen("savedfile/voterlist.txt", "r");
+    if (fp == NULL)
+    {
+        printf("\n Error in opening file...");
+    }
+    printf("\n----------------------------------------------------------------\n");
+    printf("\nSNO\t|Name of Voter\t|Date of Birth\t|Address|Password");
+    printf("\n----------------------------------------------------------------\n");
+    while (fread(&v, sizeof(voter), 1, fp) == 1)
+    {
+        if (v.SNO == sno)
+        {
+            flag = 1;
+            printf("%d\t", v.SNO);
+            printf("%s\t\t", v.voterName);
+            printf("%d/%d/%d\t", v.birthDate.day, v.birthDate.month, v.birthDate.year);
+            printf("%s\t", v.address);
+            printf("%s\n", v.password);
+            break;
+        }
+    }
+    if (flag != 1)
+    {
+        printf("\n Record not found in voter list");
+    }
+    printf("\n----------------------------------------------------------------\n");
+
+    fclose(fp);
 }
 int ageEligibility(date d)
 {
@@ -330,7 +455,7 @@ void admin()
 {
     int passcount = 3;
     char password[8];
-    int adminChoice;
+    int adminChoice, sno;
     char choice;
     while (passcount >= 1)
     {
@@ -369,6 +494,9 @@ void admin()
                     updateVoterDetails();
                     break;
                 case 5:
+                    printf("\n Enter the SNO of Voter:");
+                    scanf("%d", &sno);
+                    searchVoterDetails(sno);
                     break;
                 case 6:
                     break;
