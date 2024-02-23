@@ -6,14 +6,16 @@ struct Date
 };
 typedef struct Date date;
 
-struct Schedule{
+struct Schedule
+{
     char constituency[100];
     date d;
 };
 
 typedef struct Schedule schedule;
 
-struct Voter{
+struct Voter
+{
     int SNO;
     char voterName[50];
     date birthDate;
@@ -22,6 +24,9 @@ struct Voter{
 };
 
 typedef struct Voter voter;
+
+
+
 
 int is_validate_date(date d);
 

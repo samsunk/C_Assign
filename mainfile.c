@@ -5,6 +5,15 @@
 #include "myschedule.h"
 #include "candidate.h"
 
+struct VoterResult
+{
+    char cname[20];
+    char canFrom[50];
+    int vcount;
+};
+
+typedef struct VoterResult voterresult;
+
 void myExit();
 void drawLine();
 void admin();
@@ -19,6 +28,7 @@ void updateVoterDetails();
 void searchVoterDetails(int sno);
 void castVote(voter v);
 void voterdas();
+void viewVoteResult();
 
 int main()
 {
@@ -95,6 +105,7 @@ void voterdas()
                 castVote(v);
                 break;
             case 2:
+                viewVoteResult();
                 break;
             case 3:
                 myExit();
@@ -109,9 +120,17 @@ void voterdas()
 
 void castVote(voter v)
 {
-    FILE *fp_c;
-
+    FILE *fp_c, *fp_vc;
+    voterresult vr;
     candidate c;
+
+    int noc = 0;
+    char votename[20];
+    char choice;
+    char pp[20];
+    unsigned flag = 0;
+
+    int vsum = 0;
 
     printf("\n Now you are going to cast your vote...");
 
@@ -128,15 +147,124 @@ void castVote(voter v)
 
             if (strcmp(v.address, c.canFrom) == 0)
             {
-                printf("%s              ", c.name);
+                printf("%d ", noc);
+                printf("\t%s              ", c.name);
                 printf("\t%s              ", c.pParty);
                 printf("\t%s             \n", c.canFrom);
+
+                noc++;
             }
         }
+        fclose(fp_c);
         drawLine();
         printf("\n");
+        printf("\n Enter the name and party to vote candiate :");
+        scanf("%s%s", &votename, &pp);
+
+        if ((fp_vc = fopen("savedfile/votecount.txt", "r+")) == NULL)
+        {
+            printf("\n Error in opening file...");
+        }
+        else
+        {
+            if ((fp_c = fopen("savedfile/candidatelist.txt", "r")) == NULL)
+            {
+                printf("\n Error in opening file...");
+            }
+            else
+            {
+
+                while (fread(&c, sizeof(candidate), 1, fp_c) == 1)
+                {
+
+                    if ((strcmp(c.name, votename) == 0) && (strcmp(c.pParty, pp) == 0))
+                    {
+
+                        if (fread(&vr, sizeof(voterresult), 1, fp_vc) == 0)
+                        {
+
+                            strcpy(vr.cname, c.name);
+                            strcpy(vr.canFrom, c.canFrom);
+                            vr.vcount = 1;
+                            int n = fwrite(&vr, sizeof(voterresult), 1, fp_vc);
+                            if (n == 1)
+                            {
+                                printf("\n voted successfully..");
+                            }
+                            else
+                            {
+                                printf("\n error occured");
+                            }
+                        }
+                        else
+                        {
+
+                            while (fread(&vr, sizeof(voterresult), 1, fp_vc) == 1)
+                            {
+                                if (strcmp(c.name, vr.cname) == 0)
+                                {
+                                    strcpy(vr.cname, c.name);
+                                    strcpy(vr.canFrom, c.canFrom);
+
+                                    vr.vcount = vr.vcount + 1;
+                                    int n = fwrite(&vr, -sizeof(voterresult), 1, fp_vc);
+
+                                    if (n == 1)
+                                    {
+                                        printf("\n + voted successfully..");
+                                    }
+                                    else
+                                    {
+                                        printf("\n error occured");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        fclose(fp_vc);
+        fclose(fp_c);
+
+        printf("\n ***** Thank you for voting *****");
     }
 }
+void viewVoteResult()
+{
+    voterresult vr;
+    FILE *fp_vc;
+    char cons[50];
+    printf("\n Enter the consistuency:");
+    scanf("%s", &cons);
+    printf("\n Voter Result: ");
+    drawLine();
+    if ((fp_vc = fopen("savedfile/votecount.txt", "r")) == NULL)
+    {
+        printf("\n Error in opening file...");
+    }
+    else
+    {
+        printf("\n reading file...");
+        printf("\n Name \t Consistuency \t Total vote");
+        drawLine();
+        while ((fread(&vr, sizeof(voterresult), 1, fp_vc)) == 1)
+        {
+
+            if ((strcmp(cons, vr.canFrom)) == 0)
+            {
+                printf("%s\t", vr.cname);
+                printf("%s\t\t", vr.canFrom);
+                printf("%d\n", vr.vcount);
+            }
+        }
+    }
+    fclose(fp_vc);
+
+    drawLine();
+}
+
 void searchVoterDetails(int sno)
 {
     voter v;
@@ -499,6 +627,7 @@ void admin()
                     searchVoterDetails(sno);
                     break;
                 case 6:
+                    viewVoteResult();
                     break;
                 case 7:
                     viewCandidateList();
